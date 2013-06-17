@@ -137,7 +137,9 @@ while(<IN>){
 }
 close IN or die "$!";
 
-Kmer->KmerSize(23);
+my $kmer_size = length((keys %target_kmer)[0]);
+
+Kmer->KmerSize($kmer_size);
 my $fp =Fastq::Parser->new(file => $opt_reads);
 open(OUT1, ">$opt_out"."_1.fq") or die "Can't open output file $opt_out"."_1.fq$!";
 my $fp2;
