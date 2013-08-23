@@ -1,15 +1,11 @@
 package Kmer;
 
-# $Id$
-
 use warnings;
 use strict;
 
 use Verbose;
 
 our $VERSION = '0.01';
-our ($REVISION) = '$Revision$' =~ /(\d+)/;
-our ($MODIFIED) = '$Date$' =~ /Date: (\S+\s\S+)/;
 
 
 ##------------------------------------------------------------------------##
@@ -18,9 +14,13 @@ our ($MODIFIED) = '$Date$' =~ /Date: (\S+\s\S+)/;
 
 Kmer.pm
 
+=cut
+
 =head1 DESCRIPTION
 
-Class for handling Kmer stuff.
+Extract kmers from sequence strings.
+
+=cut
 
 =head1 SYNOPSIS
 
@@ -28,9 +28,15 @@ Class for handling Kmer stuff.
 
 =head1 CHANGELOG
 
+=cut
+
 =head2 0.01
 
 =over
+
+=item [Refacture] OO handle and OO METHODS instead of Class METHODS
+
+=item [PODfix]
 
 =item [Initial]
 
@@ -53,42 +59,11 @@ Class for handling Kmer stuff.
 
 =cut
 
-our $KmerSize = 19;
-
-our $_Unpack = "(A".$KmerSize."X".($KmerSize-1).")";
-
 ##------------------------------------------------------------------------##
 
 =head1 Class METHODS
 
 =cut
-
-=head2 KmerSize
-
-Get/Set the KmerSize the module is currently using
-
-=cut
-
-sub KmerSize{
-	my ($class, $ks) = @_;
-	if($ks){
-		$KmerSize = $ks;
-		$_Unpack = "(A".$ks."X".($ks-1).")";
-	};
-	return $KmerSize;
-}
-
-
-sub Kmerize{
-	my ($class,$seq) = @_;
-	return unpack($_Unpack.((length $seq) - $KmerSize+1 ), $seq);
-}
-
-sub Kmerize_nr{
-	my ($class,$seq) = @_;
-	map{my $krc = reverse $_; $krc =~ tr/ATGC/TACG/; $_ gt $krc ? $krc : $_}unpack($_Unpack.((length $seq) - $KmerSize+1 ), $seq);
-}
-
 
 ##------------------------------------------------------------------------##
 
@@ -96,28 +71,7 @@ sub Kmerize_nr{
 
 =head2 new
 
-Create a new FASTQ seq object. Either provide "seq_head", "seq", 
- "qual_head", and "qual" as first four parameter or the four lines as one 
- STRING. Additional parameter can be specified in key => value format. 
- C<phred_offset> defaults to undef. 
-
-When used on a Fastq::Seq object, it acts as cloning method, also 
- allowing for additional parameter in key => value format. Does not
- perform deep copy, not required for this object.
-
-  # construct new object
-  $fq = Fastq::Seq->new(<4_line_fastq_string>, phred_offset => 33);
-  # or
-  fq = Fastq::Seq->new(
-  	<seq_head_string>,
-  	<seq_string>,
-  	<qual_head_string>,
-    <qual_string>,
-  	phred_offset => 33,
-  );
-  
-  # clone object and set a new header at the same time
-  $fq_clone = $fq->new(seq_head => 'NEW_HEADER');
+  $kh = Kmer->new(kmer_size => 19);
 
 =cut
 
@@ -129,23 +83,21 @@ sub new{
 	# object method -> clone + overwrite
 	if($class = ref $proto){ 
 		return bless ({%$proto, @_}, $class);
-	}else{ # init empty obj
-		$class = $proto;
-		$self = {};
 	}
-	
+
 	# class method -> construct + overwrite
-	if(@_){
-		if(@_%2){ # create object from string
-
-		}else{ # create object from array
-
-		}
-	}
+	# init empty obj
+	$self = {
+		kmer_size => undef,
+		@_
+	};
+	
+	die "kmer_size required" unless $self->{kmer_size};
+	
+	$self->{_unpack} = "(A".$self->{kmer_size}."X".($self->{kmer_size}-1).")"; 
 	
 	return bless $self, $proto;
 }
-
 
 
 
@@ -154,6 +106,48 @@ sub new{
 =head1 Object METHODS
 
 =cut
+
+=head2
+
+  $kh->kmer_size()
+    # 19
+  $kh->kmer_size(4)
+    # 4
+
+=cut
+
+sub kmer_size{
+	my ($self, $ks) = @_;
+	if($ks){
+		$self->{kmer_size} = $ks;
+		$self->{_unpack} = "(A".$ks."X".($ks-1).")";
+	};
+	return $self->{kmer_size};
+}
+
+=head2 kmerize
+
+  $kh->kmerize("ATAGG");
+    # ATAG,TAGG
+
+=cut
+
+sub kmerize{
+	my ($self,$seq) = @_;
+	return unpack($self->{_unpack}.((length $seq) - $self->{kmer_size}+1 ), $seq);
+}
+
+=head2 kmerize_nr
+
+  $kh->kmerize_nr("ATAGG");
+    # ATAG,CCTA
+
+=cut
+
+sub kmerize_nr{
+	my ($self,$seq) = @_;
+	map{my $krc = reverse $_; $krc =~ tr/ATGC/TACG/; $_ gt $krc ? $krc : $_}unpack($self->{_unpack}.((length $seq) - $self->{kmer_size}+1 ), $seq);
+}
 
 
 ##------------------------------------------------------------------------##

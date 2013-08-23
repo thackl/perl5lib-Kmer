@@ -54,8 +54,6 @@ my @kmers_nr = (
 	'AGCC',	# GGCT
 );
 
-map{my $krc = reverse $_; $krc =~ tr/ATGC/TACG/; print $krc, "\n"}@kmers;
-
 
 #--------------------------------------------------------------------------#
 =head2 load module
@@ -64,33 +62,50 @@ map{my $krc = reverse $_; $krc =~ tr/ATGC/TACG/; print $krc, "\n"}@kmers;
 
 BEGIN { use_ok('Kmer'); }
 
-my $class = 'Kmer';
+my $Class = 'Kmer';
 
 #--------------------------------------------------------------------------#
 
-
-subtest "$class->KmerSize" => sub{
-	can_ok($class, 'KmerSize');
-	is(Kmer->KmerSize, 19, 'KmerSize default');
-	is($Kmer::KmerSize, 19, '$KmerSize default');
-	is(Kmer->KmerSize(4), 4, 'KmerSize set');
-	is($Kmer::KmerSize, 4, '$KmerSize set');
-
+my $obj;
+subtest 'new object' => sub{
+	$obj = new_ok($Class, [kmer_size => 19]);
+	is($obj->{kmer_size}, 19, "attribute kmer_size")
 };
 
-subtest "$class->Kmerize" => sub{
-	can_ok($class, 'Kmerize');
-	is_deeply([$class->Kmerize($seq)], \@kmers, 'Kmerize');
+subtest '$obj->kmer_size' => sub{
+	can_ok($obj, 'kmer_size');
+	is($obj->kmer_size, 19, 'kmer_size get');
+	is($obj->kmer_size(4), 4, 'kmer_size set');
 };
 
+subtest '$obj->kmerize' => sub{
+	can_ok($obj, 'kmerize');
+	is_deeply([$obj->kmerize($seq)], \@kmers, 'kmerize');
+};
 
-subtest "$class->Kmerize_nr" => sub{
-	can_ok($class, 'Kmerize_nr');
-	is_deeply([$class->Kmerize_nr($seq)], \@kmers_nr, 'Kmerize nr');
+subtest '$obj->kmerize_nr' => sub{
+	can_ok($obj, 'kmerize_nr');
+	is_deeply([$obj->kmerize_nr($seq)], \@kmers_nr, 'kmerize_nr');
 };
 
 done_testing();
 
-__END__
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
