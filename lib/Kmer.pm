@@ -127,6 +127,9 @@ sub kmer_size{
 
 =head2 kmerize
 
+Factor a STRING into a LIST of overlapping kmers. Kmers are returned in 
+ their literal version.
+
   $kh->kmerize("ATAGG");
     # ATAG,TAGG
 
@@ -137,14 +140,19 @@ sub kmerize{
 	return unpack($self->{_unpack}.((length $seq) - $self->{kmer_size}+1 ), $seq);
 }
 
-=head2 kmerize_nr
+=head2 cmerize
 
-  $kh->kmerize_nr("ATAGG");
+Factor a STRING into a LIST of overlapping kmers. Kmers are returned in 
+ their canonical representation. The canonical representation is the
+ lexically first of the literal and the reverse complement version of any
+ kmer.
+
+  $kh->cmerize("ATAGG");
     # ATAG,CCTA
 
 =cut
 
-sub kmerize_nr{
+sub cmerize{
 	my ($self,$seq) = @_;
 	map{my $krc = reverse $_; $krc =~ tr/ATGC/TACG/; $_ gt $krc ? $krc : $_}unpack($self->{_unpack}.((length $seq) - $self->{kmer_size}+1 ), $seq);
 }
