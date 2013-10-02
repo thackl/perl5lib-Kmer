@@ -34,6 +34,8 @@ Extract kmers from sequence strings.
 
 =over
 
+=item [BugFix] chomp($seq) in kmerize/cmerize
+
 =item [Refacture] OO handle and OO METHODS instead of Class METHODS
 
 =item [PODfix]
@@ -137,6 +139,7 @@ Factor a STRING into a LIST of overlapping kmers. Kmers are returned in
 
 sub kmerize{
 	my ($self,$seq) = @_;
+	chomp($seq);
 	return unpack($self->{_unpack}.((length $seq) - $self->{kmer_size}+1 ), $seq);
 }
 
@@ -154,6 +157,7 @@ Factor a STRING into a LIST of overlapping kmers. Kmers are returned in
 
 sub cmerize{
 	my ($self,$seq) = @_;
+	chomp($seq);
 	map{my $krc = reverse $_; $krc =~ tr/ATGC/TACG/; $_ gt $krc ? $krc : $_}unpack($self->{_unpack}.((length $seq) - $self->{kmer_size}+1 ), $seq);
 }
 
