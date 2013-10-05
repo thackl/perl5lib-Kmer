@@ -54,7 +54,6 @@ my @kmers_nr = (
 	'AGCC',	# GGCT
 );
 
-
 #--------------------------------------------------------------------------#
 =head2 load module
 
@@ -69,7 +68,18 @@ my $Class = 'Kmer';
 my $obj;
 subtest 'new object' => sub{
 	$obj = new_ok($Class, [kmer_size => 19]);
-	is($obj->{kmer_size}, 19, "attribute kmer_size")
+	my @attr = (
+		kmer_size => 19,
+		shift_by => 1,
+		_u_shift => -18,
+		_u_patt => '(A19X18)%dA19',
+		_u_size => 1,
+	);
+	while(@attr){
+		my ($attr, $re) = (shift @attr, shift @attr);
+		is($obj->{$attr}, $re, "attribute $attr");
+	}
+	is_deeply($obj->{_u_tpl},{},"attribute _u_tpl");
 };
 
 subtest '$obj->kmer_size' => sub{
@@ -78,14 +88,33 @@ subtest '$obj->kmer_size' => sub{
 	is($obj->kmer_size(4), 4, 'kmer_size set');
 };
 
+subtest '$obj->shift_by' => sub{
+	can_ok($obj, 'shift_by');
+	is($obj->shift_by, 1, 'shift_by get');
+	is($obj->shift_by(4), 4, 'shift_by set');
+	is($obj->shift_by(1), 1, 'shift_by reset');
+};
+
 subtest '$obj->kmerize' => sub{
 	can_ok($obj, 'kmerize');
 	is_deeply([$obj->kmerize($seq)], \@kmers, 'kmerize');
+	foreach my $incr (2..20){
+		$obj->shift_by($incr);
+		my $i=0;
+		is_deeply([$obj->kmerize($seq)], [grep{! ($i++%$incr)}@kmers], 'kmerize shift_by => '.$incr);
+	}
+	$obj->shift_by(1);
 };
 
-subtest '$obj->kmerize_nr' => sub{
-	can_ok($obj, 'kmerize_nr');
-	is_deeply([$obj->kmerize_nr($seq)], \@kmers_nr, 'kmerize_nr');
+subtest '$obj->cmerize' => sub{
+	can_ok($obj, 'cmerize');
+	is_deeply([$obj->cmerize($seq)], \@kmers_nr, 'cmerize');
+	foreach my $incr (2..20){
+		$obj->shift_by($incr);
+		my $i=0;
+		is_deeply([$obj->cmerize($seq)], [grep{! ($i++%$incr)}@kmers_nr], 'cmerize shift_by => '.$incr);
+	}
+	$obj->shift_by(1);
 };
 
 done_testing();
