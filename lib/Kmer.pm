@@ -200,6 +200,8 @@ Factor a STRING into a LIST of overlapping kmers. Kmers are returned in
 sub kmerize{
 	my ($self,$seq) = @_;
 	chomp($seq);
+	die "$seq shorter than kmer-size" unless length($seq) > $self->{kmer_size};
+
 	return unpack($self->{_u_tpl}{length $seq} || $self->_create_u_tpl(length $seq), $seq);
 }
 
@@ -218,6 +220,8 @@ Factor a STRING into a LIST of overlapping kmers. Kmers are returned in
 sub cmerize{
 	my ($self,$seq) = @_;
 	chomp($seq);
+	die "$seq shorter than kmer-size" unless length($seq) > $self->{kmer_size};
+
 	map{
 		my $krc = reverse $_; $krc =~ tr/ATGC/TACG/; $_ gt $krc ? $krc : $_
 	}unpack($self->{_u_tpl}{length $seq} || $self->_create_u_tpl(length $seq), $seq);
