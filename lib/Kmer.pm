@@ -3,9 +3,7 @@ package Kmer;
 use warnings;
 use strict;
 
-use Verbose;
-
-our $VERSION = '0.02';
+our $VERSION = '0.0.3';
 
 
 ##------------------------------------------------------------------------##
